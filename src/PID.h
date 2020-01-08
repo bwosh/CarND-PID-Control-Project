@@ -37,6 +37,9 @@ class PID {
   double Kp;
   double Ki;
   double Kd;
+
+  double cte_sum;
+  double last_cte;
 };
 
 #endif  // PID_H

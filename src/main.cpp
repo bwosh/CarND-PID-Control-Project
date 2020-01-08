@@ -54,19 +54,13 @@ int main() {
           double cte = std::stod(j[1]["cte"].get<string>());
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
-          double steer_value;
 
           SteetingData data = pid.getSteeringValueByPID(cte,speed,angle);
           
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
-
           json msgJson;
           msgJson["steering_angle"] = data.angle;
           msgJson["throttle"] = data.throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
