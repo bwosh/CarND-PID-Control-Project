@@ -1,45 +1,54 @@
 #ifndef PID_H
 #define PID_H
 
-struct SteetingData
-{
-    double angle;
-    double throttle;
-};
+#include "search.h"
 
 class PID {
- public:
-  /**
-   * Constructor
-   */
-  PID();
+private:
 
-  /**
-   * Destructor.
-   */
-  virtual ~PID();
+  /*
+  * Errors
+  */
+  double p_error = 0;
+  double i_error = 0;
+  double d_error = 0;
 
-  /**
-   * Initialize PID.
-   * @param (Kp_, Ki_, Kd_) The initial PID coefficients
-   */
-  void Init(double Kp_, double Ki_, double Kd_);
-
-  /**
-   * Steering calculation
-   */
-  SteetingData getSteeringValueByPID(double cte, double speed, double angle);
-
- private:
-  /**
-   * PID Coefficients
-   */ 
+  /*
+  * Coefficients
+  */
   double Kp;
   double Ki;
   double Kd;
 
-  double cte_sum;
-  double last_cte;
+
+
+public:
+  Search *search; // TODO do private
+
+  /*
+  * Constructor
+  */
+  PID(Search *search);
+
+  /*
+  * Destructor.
+  */
+  virtual ~PID();
+
+ /*
+  * Initialize coefficients
+  */
+  void Init(double Kp, double Ki, double Kd);
+
+  /*
+  * Update the PID error variables given cross track error.
+  */
+  void UpdateError(double cte);
+
+  /*
+  * Calculate the total PID error.
+  */
+  double TotalError();
 };
 
-#endif  // PID_H
+#endif /* PID_H */

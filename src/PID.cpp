@@ -1,35 +1,38 @@
-#include <iostream>
 #include "PID.h"
 
-PID::PID() {}
+PID::PID(Search *search) {
+  this->search = search;
+}
+
+void PID::Init(double Kp, double Ki, double Kd)
+{
+  this->Kp = Kp;
+  this->Ki = Ki;
+  this->Kd = Kd;
+
+  d_error = 0;
+  p_error = 0;
+  i_error = 0;
+}
 
 PID::~PID() {}
 
-void PID::Init(double Kp_, double Ki_, double Kd_) {
-  this->Kd = Kd_;
-  this->Ki = Ki_;
-  this->Kp = Kp_;
-
-  this->cte_sum = 0;
-  this->last_cte = 0;
+void PID::UpdateError(double cte) {
+  d_error = cte - p_error;
+  p_error = cte;
+  i_error += cte;
 }
 
-SteetingData PID::getSteeringValueByPID(double cte, double speed, double angle)
-{
-  double dt_cte = cte-last_cte;
-  cte_sum += cte;
-  last_cte = cte;
+double PID::TotalError() {
+  double steer = -Kp * p_error - Kd * d_error - Ki * i_error;
 
-  double steer = -Kp * cte - Kp*dt_cte - Ki*cte_sum ;
+  // Check constraints
+  if (steer < -1) {
+    steer = -1;
+  }
+  if (steer > 1) {
+    steer = 1;
+  }
 
-  std::cout << "CTE: " << cte << std::endl;
-  std::cout << "speed: " << speed << std::endl;
-  std::cout << "angle: " << angle << std::endl;
-  std::cout << "Steering Value: " << steer << std::endl;
-
-  SteetingData data;
-  data.angle = steer;
-  data.throttle = 0.1;
-
-  return data;
+  return steer;
 }

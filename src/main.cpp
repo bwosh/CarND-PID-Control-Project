@@ -4,15 +4,11 @@
 #include <string>
 #include "json.hpp"
 #include "PID.h"
+#include "search.h"
 
 // for convenience
 using nlohmann::json;
 using std::string;
-
-// For converting back and forth between radians and degrees.
-constexpr double pi() { return M_PI; }
-double deg2rad(double x) { return x * pi() / 180; }
-double rad2deg(double x) { return x * 180 / pi(); }
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -33,8 +29,9 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
+  Search hyperParamsSearch(&pid, 2000, 1000);
   PID pid;
-  pid.Init(2,3,0.5);
+  pid.Init(0.2,.0001,3, &hyperParamsSearch);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
@@ -51,15 +48,18 @@ int main() {
 
         if (event == "telemetry") {
           // j[1] is the data JSON object
+
           double cte = std::stod(j[1]["cte"].get<string>());
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
 
-          SteetingData data = pid.getSteeringValueByPID(cte,speed,angle);
+          pid.UpdateError(cte);
+          double new_angle = pid.TotalError();
+          pid.search->nextIter();
           
           json msgJson;
-          msgJson["steering_angle"] = data.angle;
-          msgJson["throttle"] = data.throttle;
+          msgJson["steering_angle"] = new_angle;
+          msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
