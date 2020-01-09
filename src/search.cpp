@@ -27,9 +27,11 @@ Search::Search(PID *pid, int iters_per_parameters)
     this->twiddle_values[1] = &(this->Kd);
     this->twiddle_values[2] = &(this->Ki);
 
-    this->twiddle_deltas[0] = this->Kp/2;
-    this->twiddle_deltas[1] = this->Kd/2;
-    this->twiddle_deltas[2] = this->Ki/2;
+    static double twiddle_initial_factor =  1.0/5.0;
+
+    this->twiddle_deltas[0] = this->Kp*twiddle_initial_factor;
+    this->twiddle_deltas[1] = this->Kd*twiddle_initial_factor;
+    this->twiddle_deltas[2] = this->Ki*twiddle_initial_factor;
 
 }
 
@@ -94,13 +96,15 @@ void Search::saveBest(double err, double Kp, double Kd, double Ki)
 
 void Search::changeParameters(bool newbest)
 {
+    static double multiply_decay = 0.1;
+
     if(newbest)
     {
-        twiddle_deltas[twiddle_index] *= 1.1;
+        twiddle_deltas[twiddle_index] *= 1.0+multiply_decay;
     }else{
         if(!twiddle_direction)
         {
-            twiddle_deltas[twiddle_index] *= 0.9;   
+            twiddle_deltas[twiddle_index] *= 1.0-multiply_decay;   
         }
     }
 
