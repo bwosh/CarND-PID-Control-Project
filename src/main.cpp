@@ -29,7 +29,7 @@ int main() {
   uWS::Hub h;
 
   int raceLoopIterations = 5000;
-  bool useSearch = true;
+  static bool useSearch = true;
 
   PID pid(1.23,.0001,3);
   Search hyperParamsSearch(&pid, raceLoopIterations);
