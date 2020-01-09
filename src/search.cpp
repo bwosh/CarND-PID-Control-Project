@@ -28,6 +28,7 @@ void Search::nextIter()
         double mae = pid->MeanAbsoluteError();
         double mse = pid->MeanSquaredError();
 
+        // Debug info
         std::cout << "===== Loop " << this->currentLoop 
                 << ", Iter:" << this->currentIteration
                 << " =====" << std::endl;
@@ -42,6 +43,7 @@ void Search::nextIter()
                 << ", sqrt(MSE):" << sqrt(mse)
                 << std::endl;
         
+        // Handling new error and saving best result if applicable
         double error = mse;
 
         if( error<this->bestError)
@@ -54,8 +56,8 @@ void Search::nextIter()
                 << std::endl;            
         }
 
+        // Changing parameters anch starting next search loop
         this->changeParameters();
-
         this->currentLoop++;
         this->currentIteration = 0;
     }
