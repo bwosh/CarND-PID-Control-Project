@@ -53,19 +53,7 @@ void Search::nextIter()
         std::cout << " MAE:" << mae
                 << ", MSE:" << mse
                 << ", sqrt(MSE):" << sqrt(mse)
-                << std::endl;
-
-        std::cout << " TWIDDLE deltas:" 
-                << this->twiddle_deltas[0] << ","
-                << this->twiddle_deltas[1] << ","
-                << this->twiddle_deltas[2]
-                << std::endl;    
-
-        std::cout << " TWIDDLE values:" 
-                << *(this->twiddle_values[0]) << ","
-                << *(this->twiddle_values[1]) << ","
-                << *(this->twiddle_values[2])
-                << std::endl;   
+                << std::endl;  
         
         // Handling new error and saving best result if applicable
         double error = mse;
@@ -109,24 +97,20 @@ void Search::changeParameters(bool newbest)
     if(newbest)
     {
         twiddle_deltas[twiddle_index] *= 1.1;
-        std::cout << "dp[i] *=1.1" << std::endl; 
     }else{
         if(!twiddle_direction)
         {
             twiddle_deltas[twiddle_index] *= 0.9;   
-            std::cout << "dp[i] *=0.9" << std::endl;  
         }
     }
 
     if(twiddle_direction)
     {
         *twiddle_values[twiddle_index] +=  twiddle_deltas[twiddle_index];
-        std::cout << "+dp[i]" << std::endl; 
     }else{
         if(!newbest)
         {
             *twiddle_values[twiddle_index] -=  2*twiddle_deltas[twiddle_index];
-            std::cout << "-2*dp[i]" << std::endl; 
         }
     }
     

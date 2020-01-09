@@ -29,8 +29,9 @@ int main() {
   uWS::Hub h;
 
   int raceLoopIterations = 5000;
+  bool useSearch = true;
 
-  PID pid(0.2,.0001,3);
+  PID pid(1.23,.0001,3);
   Search hyperParamsSearch(&pid, raceLoopIterations);
   PIDData piddata(&pid, &hyperParamsSearch);
 
@@ -56,7 +57,8 @@ int main() {
 
           piddata.GetPID()->UpdateError(cte);
           double new_angle = piddata.GetPID()->TotalError();
-          piddata.GetSearch()->nextIter();
+          if(useSearch)
+            piddata.GetSearch()->nextIter();
           
           json msgJson;
           msgJson["steering_angle"] = new_angle;
