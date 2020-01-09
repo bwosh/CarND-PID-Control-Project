@@ -1,4 +1,4 @@
-#include "PID.h"
+#include "pid.h"
 
 PID::PID(double Kp, double Ki, double Kd) {
   this->Init(Kp, Ki, Kd);
