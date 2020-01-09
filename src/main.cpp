@@ -32,8 +32,9 @@ int main() {
   static bool useSearch = true;
   
   // Kp:0.2 Kd:33.0, Ki:0.0001, 
-  // 8 loops: Kp: 0.214667, Kd:3.242, Ki:0.0001
-  PID pid(0.214667, 3.242, 0.0001);
+  // +8 loops: Kp: 0.214667, Kd:3.242, Ki:0.0001
+  // +6 loops: Kp 0.230409, Kd:3.0518, Ki:9.46667e-05
+  PID pid(0.230409, 3.0518, 0.000094666);
   Search hyperParamsSearch(&pid, raceLoopIterations);
   PIDData piddata(&pid, &hyperParamsSearch);
 

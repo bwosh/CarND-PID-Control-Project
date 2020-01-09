@@ -1,4 +1,5 @@
 #include "pid.h"
+#include <cmath>
 
 PID::PID(double Kp, double Kd, double Ki) {
   this->Init(Kp, Kd, Ki);
@@ -13,6 +14,7 @@ void PID::Init(double Kp, double Kd, double Ki)
   d_error = 0;
   p_error = 0;
   i_error = 0;
+  iabs_error = 0;
   i2_error = 0;
   samples_count = 0;
 }
@@ -23,13 +25,14 @@ void PID::UpdateError(double cte) {
   d_error = cte - p_error;
   p_error = cte;
   i_error += cte;
+  iabs_error += abs(cte);
   i2_error += cte*cte;
   samples_count++;
 }
 
 double PID::MeanAbsoluteError()
 {
-  return i_error/(double)samples_count;
+  return iabs_error/(double)samples_count;
 }
 
 double PID::MeanSquaredError()

@@ -37,28 +37,22 @@ Search::Search(PID *pid, int iters_per_parameters)
 
 void Search::nextIter()
 {
-    this->currentIteration++;
-    if((this->currentIteration % this->iters_per_parameters)==0)
+    if(this->currentIteration==0)
     {
-        double mae = pid->MeanAbsoluteError();
-        double mse = pid->MeanSquaredError();
-
-        // Debug info
         std::cout << "===== Loop " << this->currentLoop 
-                << " =====" << std::endl;
-
-        std::cout << " Kp " << Kp
+                << "  [Kp: " << Kp
                 << ", Kd:" << Kd
                 << ", Ki:" << Ki
+                << "]"
                 << std::endl;
+    }
 
-        std::cout << " MAE:" << mae
-                << ", MSE:" << mse
-                << ", sqrt(MSE):" << sqrt(mse)
-                << std::endl;  
-        
+    this->currentIteration++;
+    
+    if((this->currentIteration % this->iters_per_parameters)==0)
+    {        
         // Handling new error and saving best result if applicable
-        double error = mse;
+        double error = pid->MeanSquaredError();
         bool new_best = false;
 
         if( error<this->bestError)

@@ -11,6 +11,7 @@ private:
   double p_error = 0;
   double i_error = 0;
   double d_error = 0;
+  double iabs_error = 0;
   double i2_error = 0;
   int samples_count = 0;
 
@@ -27,7 +28,7 @@ public:
   /*
   * Constructor
   */
-  PID(double Kp, double Ki, double Ki);
+  PID(double Kp, double Kd, double Ki);
 
   /*
   * Destructor.
