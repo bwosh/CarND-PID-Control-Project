@@ -1,7 +1,6 @@
 #ifndef PID_H
 #define PID_H
 
-#include "search.h"
 
 class PID {
 private:
@@ -23,12 +22,10 @@ private:
 
 
 public:
-  Search *search; // TODO do private
-
   /*
   * Constructor
   */
-  PID(Search *search);
+  PID(double Kp, double Ki, double Kd);
 
   /*
   * Destructor.

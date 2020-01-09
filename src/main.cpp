@@ -3,8 +3,7 @@
 #include <iostream>
 #include <string>
 #include "json.hpp"
-#include "PID.h"
-#include "search.h"
+#include "piddata.h"
 
 // for convenience
 using nlohmann::json;
@@ -29,11 +28,11 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
+  PID pid(0.2,.0001,3);
   Search hyperParamsSearch(&pid, 2000, 1000);
-  PID pid;
-  pid.Init(0.2,.0001,3, &hyperParamsSearch);
+  PIDData piddata(&pid, &hyperParamsSearch);
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&piddata](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -53,9 +52,9 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
 
-          pid.UpdateError(cte);
-          double new_angle = pid.TotalError();
-          pid.search->nextIter();
+          piddata.GetPID()->UpdateError(cte);
+          double new_angle = piddata.GetPID()->TotalError();
+          piddata.GetSearch()->nextIter();
           
           json msgJson;
           msgJson["steering_angle"] = new_angle;

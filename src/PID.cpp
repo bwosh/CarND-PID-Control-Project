@@ -1,7 +1,7 @@
 #include "PID.h"
 
-PID::PID(Search *search) {
-  this->search = search;
+PID::PID(double Kp, double Ki, double Kd) {
+  this->Init(Kp, Ki, Kd);
 }
 
 void PID::Init(double Kp, double Ki, double Kd)
