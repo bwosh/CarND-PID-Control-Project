@@ -6,15 +6,14 @@
 class Search
 {
     public:
-        Search(PID *pid, int iters_per_parameters, int all_loops);
+        Search(PID *pid, int iters_per_parameters);
         void nextIter(void);
     private:
        void saveBest(double err, double Kp, double Kd, double Ki);
-       void changeParameters(void);
+       void changeParameters(bool newbest);
 
        // Parameters to seach
        int iters_per_parameters;
-       int all_loops;
 
        // Variables to save current search state
        int currentLoop;
@@ -33,6 +32,13 @@ class Search
        double best_Kp;
        double best_Kd;
        double best_Ki;
+       int bestLoopIndex;
+
+       // Twiddle search
+       double twiddle_deltas[3];
+       double **twiddle_values;
+       int twiddle_index;
+       bool twiddle_direction;
 };
 
 #endif

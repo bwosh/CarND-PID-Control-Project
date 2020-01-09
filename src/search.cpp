@@ -2,11 +2,10 @@
 #include <iostream>
 #include <cmath>
 
-Search::Search(PID *pid, int iters_per_parameters, int all_loops)
+Search::Search(PID *pid, int iters_per_parameters)
 {
     this->pid = pid;
     this->iters_per_parameters = iters_per_parameters;
-    this->all_loops = all_loops;
 
     this->currentIteration = 0;
     this->currentLoop = 0;
@@ -18,6 +17,20 @@ Search::Search(PID *pid, int iters_per_parameters, int all_loops)
 
     this->bestError = std::numeric_limits<double>().max();
     this->saveBest(this->bestError, this->Kp, this->Kd, this->Ki );
+
+    // Set twiddle initial values
+    this->twiddle_index = 0;
+    this->twiddle_direction = true;
+
+    this->twiddle_values = (double **)(new void*[3]);
+    this->twiddle_values[0] = &(this->Kp);
+    this->twiddle_values[1] = &(this->Kd);
+    this->twiddle_values[2] = &(this->Ki);
+
+    this->twiddle_deltas[0] = this->Kp/2;
+    this->twiddle_deltas[1] = this->Kd/2;
+    this->twiddle_deltas[2] = this->Ki/2;
+
 }
 
 void Search::nextIter()
@@ -30,7 +43,6 @@ void Search::nextIter()
 
         // Debug info
         std::cout << "===== Loop " << this->currentLoop 
-                << ", Iter:" << this->currentIteration
                 << " =====" << std::endl;
 
         std::cout << " Kp " << Kp
@@ -42,22 +54,37 @@ void Search::nextIter()
                 << ", MSE:" << mse
                 << ", sqrt(MSE):" << sqrt(mse)
                 << std::endl;
+
+        std::cout << " TWIDDLE deltas:" 
+                << this->twiddle_deltas[0] << ","
+                << this->twiddle_deltas[1] << ","
+                << this->twiddle_deltas[2]
+                << std::endl;    
+
+        std::cout << " TWIDDLE values:" 
+                << *(this->twiddle_values[0]) << ","
+                << *(this->twiddle_values[1]) << ","
+                << *(this->twiddle_values[2])
+                << std::endl;   
         
         // Handling new error and saving best result if applicable
         double error = mse;
+        bool new_best = false;
 
         if( error<this->bestError)
         {
             this->saveBest(error, Kp, Kd, Ki);
+            new_best = true;
         }else{
-            std::cout << " " << error << " is worse than best " <<this->bestError << ", Kp " << Kp
-                << ", Kd:" << Kd
-                << ", Ki:" << Ki
+            std::cout << " " << error << " is worse than best " <<this->bestError << ", Kp " << best_Kp
+                << ", Kd:" << best_Kd
+                << ", Ki:" << best_Ki
+                << "@loop " << bestLoopIndex
                 << std::endl;            
         }
 
         // Changing parameters anch starting next search loop
-        this->changeParameters();
+        this->changeParameters(new_best);
         this->currentLoop++;
         this->currentIteration = 0;
     }
@@ -65,6 +92,7 @@ void Search::nextIter()
 
 void Search::saveBest(double err, double Kp, double Kd, double Ki)
 {
+    this->bestLoopIndex = this->currentLoop;
     this->bestError = err;
     this->best_Kp = Kp;
     this->best_Kd = Kd;
@@ -76,8 +104,35 @@ void Search::saveBest(double err, double Kp, double Kd, double Ki)
             << std::endl;
 }
 
-void Search::changeParameters()
+void Search::changeParameters(bool newbest)
 {
-    // TODO change parameters algorithmically
-    //std::cout << "...TODO:CHANGE..." << std::endl;
+    if(newbest)
+    {
+        twiddle_deltas[twiddle_index] *= 1.1;
+        std::cout << "dp[i] *=1.1" << std::endl; 
+    }else{
+        if(!twiddle_direction)
+        {
+            twiddle_deltas[twiddle_index] *= 0.9;   
+            std::cout << "dp[i] *=0.9" << std::endl;  
+        }
+    }
+
+    if(twiddle_direction)
+    {
+        *twiddle_values[twiddle_index] +=  twiddle_deltas[twiddle_index];
+        std::cout << "+dp[i]" << std::endl; 
+    }else{
+        if(!newbest)
+        {
+            *twiddle_values[twiddle_index] -=  2*twiddle_deltas[twiddle_index];
+            std::cout << "-2*dp[i]" << std::endl; 
+        }
+    }
+    
+    twiddle_direction = !twiddle_direction;
+    if(!twiddle_direction)
+        twiddle_index++;
+    if(twiddle_index>=3)
+        twiddle_index = 0; 
 }
