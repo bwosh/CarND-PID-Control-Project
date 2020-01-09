@@ -1,10 +1,10 @@
 #include "pid.h"
 
-PID::PID(double Kp, double Ki, double Kd) {
-  this->Init(Kp, Ki, Kd);
+PID::PID(double Kp, double Kd, double Ki) {
+  this->Init(Kp, Kd, Ki);
 }
 
-void PID::Init(double Kp, double Ki, double Kd)
+void PID::Init(double Kp, double Kd, double Ki)
 {
   this->Kp = Kp;
   this->Ki = Ki;
@@ -15,7 +15,6 @@ void PID::Init(double Kp, double Ki, double Kd)
   i_error = 0;
   i2_error = 0;
   samples_count = 0;
-
 }
 
 PID::~PID() {}

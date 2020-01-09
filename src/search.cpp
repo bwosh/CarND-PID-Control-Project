@@ -66,10 +66,10 @@ void Search::nextIter()
             this->saveBest(error, Kp, Kd, Ki);
             new_best = true;
         }else{
-            std::cout << " " << error << " is worse than best " <<this->bestError << ", Kp " << best_Kp
+            std::cout << " " << error << " is worse than best " <<this->bestError << ", [Kp " << best_Kp
                 << ", Kd:" << best_Kd
                 << ", Ki:" << best_Ki
-                << "@loop " << bestLoopIndex
+                << "] @loop " << bestLoopIndex
                 << std::endl;            
         }
 
@@ -88,10 +88,10 @@ void Search::saveBest(double err, double Kp, double Kd, double Ki)
     this->best_Kd = Kd;
     this->best_Ki = Ki;
 
-    std::cout << " [!!!] NEW BEST: " << err << " Kp " << Kp
+    std::cout << " [!!!] NEW BEST: " << err << " [Kp " << Kp
             << ", Kd:" << Kd
             << ", Ki:" << Ki
-            << std::endl;
+            << "]" << std::endl;
 }
 
 void Search::changeParameters(bool newbest)
@@ -118,11 +118,12 @@ void Search::changeParameters(bool newbest)
         }
     }
     
-    twiddle_direction = !twiddle_direction;
     if(!twiddle_direction)
         twiddle_index++;
     if(twiddle_index>=3)
         twiddle_index = 0; 
 
-    pid->Init(this->Kp, this->Ki, this->Kd);
+    twiddle_direction = !twiddle_direction;
+
+    pid->Init(this->Kp, this->Kd, this->Ki);
 }

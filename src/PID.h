@@ -27,7 +27,7 @@ public:
   /*
   * Constructor
   */
-  PID(double Kp, double Ki, double Kd);
+  PID(double Kp, double Ki, double Ki);
 
   /*
   * Destructor.
@@ -37,7 +37,7 @@ public:
  /*
   * Initialize coefficients
   */
-  void Init(double Kp, double Ki, double Kd);
+  void Init(double Kp,  double Kd, double Ki);
 
   /*
   * Update the PID error variables given cross track error.
