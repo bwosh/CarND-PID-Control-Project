@@ -1,7 +1,7 @@
 #ifndef PIDDATA_H
 #define PIDDATA_H
 
-#include "PID.h"
+#include "pid.h"
 #include "search.h"
 
 class PIDData
