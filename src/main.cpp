@@ -31,7 +31,7 @@ int main() {
   int raceLoopIterations = 5000;
   static bool useSearch = true;
 
-  PID pid(1.23,.0001,3);
+  PID pid(0.2,.0001,3);
   Search hyperParamsSearch(&pid, raceLoopIterations);
   PIDData piddata(&pid, &hyperParamsSearch);
 
