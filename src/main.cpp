@@ -28,16 +28,18 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
-  int raceLoopIterations = 6000;
+  int raceLoopIterations = 14000;
   int validateEvery = 100;
-  static bool useSearch = true;
+  static bool useSearch = false;
   
   // Kp:0.2 Kd:3.0, Ki:0.0001
   // +16/5000i/-v optimzation loops: Kp 0.232878, Kd:3.74842, Ki:0.000100122
   // +129/400i/5v [Kp 0.252443, Kd:4.1115, Ki:0.000115009]
   // +55/800i/5v [Kp 0.29369, Kd:4.15896, Ki:0.000115388]
   // +4/6000i/100v [Kp: 0.241336, Kd:3.94704, Ki:0.000115009] (MSE: 0.167375)
-  PID pid(0.241336, 3.94704, 0.000115009);
+  // +5000GradientDescent/1i/5000: [Kp 0.23655, Kd:3.94704, Ki:0.000115009]
+  // +20SGD/1000i: [Kp 0.184724, Kd:3.77704, Ki:0]
+  PID pid(0.184724, 3.77704, 0);
   Search hyperParamsSearch(&pid, raceLoopIterations, validateEvery);
   PIDData piddata(&pid, &hyperParamsSearch);
 
@@ -70,6 +72,8 @@ int main() {
           double throttle = 0;
           if(speed<15)
             throttle = 0.2;
+          if(!useSearch)
+            throttle = 0.3;
 
           json msgJson;
           msgJson["steering_angle"] = new_angle;

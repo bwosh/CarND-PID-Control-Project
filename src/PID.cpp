@@ -1,8 +1,13 @@
 #include "pid.h"
 #include <cmath>
+#include <iostream>
 
 PID::PID(double Kp, double Kd, double Ki) {
   this->Init(Kp, Kd, Ki);
+  this->p_errors_count = 0;
+  this->p_errors_sum = 0;
+  this->d_errors_count = 0;
+  this->d_errors_sum = 0;
 }
 
 void PID::Init(double Kp, double Kd, double Ki)
@@ -28,6 +33,8 @@ void PID::UpdateError(double cte) {
   iabs_error += abs(cte);
   i2_error += cte*cte;
   samples_count++;
+
+  GradientDescent();
 }
 
 double PID::MeanAbsoluteError()
@@ -67,4 +74,30 @@ double PID::GetKi()
 double PID::GetKd()
 {
   return Kd;
+}
+
+void PID::GradientDescent(void){
+  float paramP = 0.0001;        
+  float paramD = 0.01;
+  p_errors_count += 1;
+  d_errors_count += 1;
+  p_errors_sum += p_error;
+  d_errors_sum += d_error;
+
+  if (p_errors_count>=10000)
+  {
+    Kp = Kp - paramP * (p_errors_sum/p_errors_count);
+    Kd = Kd - paramD * (d_errors_sum/d_errors_sum);
+
+    std::cout << "[Kp " << Kp
+              << ", Kd:" << Kd
+              << ", Ki:" << Ki
+              << "]" << std::endl;
+
+    this->p_errors_count = 0;
+    this->p_errors_sum = 0;
+    this->d_errors_count = 0;
+    this->d_errors_sum = 0;
+  }
+
 }

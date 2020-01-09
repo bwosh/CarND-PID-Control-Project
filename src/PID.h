@@ -1,7 +1,6 @@
 #ifndef PID_H
 #define PID_H
 
-
 class PID {
 private:
 
@@ -11,6 +10,12 @@ private:
   double p_error = 0;
   double i_error = 0;
   double d_error = 0;
+
+  double p_errors_sum;
+  double d_errors_sum;
+  double p_errors_count;
+  double d_errors_count;
+
   double iabs_error = 0;
   double i2_error = 0;
   int samples_count = 0;
@@ -50,7 +55,8 @@ public:
   */
   double TotalError();
 
-  
+  void GradientDescent(void);
+
   double GetKp();
   double GetKi();
   double GetKd();
