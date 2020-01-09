@@ -57,12 +57,18 @@ int main() {
 
           piddata.GetPID()->UpdateError(cte);
           double new_angle = piddata.GetPID()->TotalError();
+
+          double throttle = 0.3;
           if(useSearch)
             piddata.GetSearch()->nextIter();
-          
+
+            //throttle = -(speed - 15)/15*3;
+            //if (throttle<0)
+            //  throttle=0;
+
           json msgJson;
           msgJson["steering_angle"] = new_angle;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if

@@ -27,7 +27,7 @@ Search::Search(PID *pid, int iters_per_parameters)
     this->twiddle_values[1] = &(this->Kd);
     this->twiddle_values[2] = &(this->Ki);
 
-    static double twiddle_initial_factor =  1.0/5.0;
+    static double twiddle_initial_factor =  1.0/15.0;
 
     this->twiddle_deltas[0] = this->Kp*twiddle_initial_factor;
     this->twiddle_deltas[1] = this->Kd*twiddle_initial_factor;
@@ -123,4 +123,6 @@ void Search::changeParameters(bool newbest)
         twiddle_index++;
     if(twiddle_index>=3)
         twiddle_index = 0; 
+
+    pid->Init(this->Kp, this->Ki, this->Kd);
 }
