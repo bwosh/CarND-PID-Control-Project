@@ -29,14 +29,16 @@ int main() {
   uWS::Hub h;
 
   int raceLoopIterations = 6000;
+  int validateEvery = 100;
   static bool useSearch = true;
   
   // Kp:0.2 Kd:3.0, Ki:0.0001
-  // +8 loops: Kp:0.214667, Kd:3.242, Ki:0.0001
-  // +6 loops: Kp:0.230409, Kd:3.0518, Ki:9.46667e-05
-  // +2 loops: 0.216892, Kd:3.0518, Ki:9.4666e-05
-  PID pid(0.216892, 3.0518, 0.000094666);
-  Search hyperParamsSearch(&pid, raceLoopIterations);
+  // +16/5000i/-v optimzation loops: Kp 0.232878, Kd:3.74842, Ki:0.000100122
+  // +129/400i/5v [Kp 0.252443, Kd:4.1115, Ki:0.000115009]
+  // +55/800i/5v [Kp 0.29369, Kd:4.15896, Ki:0.000115388]
+  // +4/6000i/100v [Kp: 0.241336, Kd:3.94704, Ki:0.000115009] (MSE: 0.167375)
+  PID pid(0.241336, 3.94704, 0.000115009);
+  Search hyperParamsSearch(&pid, raceLoopIterations, validateEvery);
   PIDData piddata(&pid, &hyperParamsSearch);
 
   h.onMessage([&piddata](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
@@ -62,13 +64,12 @@ int main() {
           piddata.GetPID()->UpdateError(cte);
           double new_angle = piddata.GetPID()->TotalError();
 
-          double throttle = 0.3;
           if(useSearch)
             piddata.GetSearch()->nextIter();
 
-            //throttle = -(speed - 15)/15*3;
-            //if (throttle<0)
-            //  throttle=0;
+          double throttle = 0;
+          if(speed<15)
+            throttle = 0.2;
 
           json msgJson;
           msgJson["steering_angle"] = new_angle;

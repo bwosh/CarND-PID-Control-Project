@@ -6,7 +6,7 @@
 class Search
 {
     public:
-        Search(PID *pid, int iters_per_parameters);
+        Search(PID *pid, int iters_per_parameters, int validate_every_n_loops);
         void nextIter(void);
     private:
        void saveBest(double err, double Kp, double Kd, double Ki);
@@ -14,6 +14,7 @@ class Search
 
        // Parameters to seach
        int iters_per_parameters;
+       int validate_every_n_loops;
 
        // Variables to save current search state
        int currentLoop;

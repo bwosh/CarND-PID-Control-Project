@@ -2,10 +2,11 @@
 #include <iostream>
 #include <cmath>
 
-Search::Search(PID *pid, int iters_per_parameters)
+Search::Search(PID *pid, int iters_per_parameters, int validate_every_n_loops)
 {
     this->pid = pid;
     this->iters_per_parameters = iters_per_parameters;
+    this->validate_every_n_loops = validate_every_n_loops;
 
     this->currentIteration = 0;
     this->currentLoop = 0;
@@ -15,8 +16,7 @@ Search::Search(PID *pid, int iters_per_parameters)
     this->Kd = pid->GetKd();
     this->Ki = pid->GetKi();
 
-    this->bestError = std::numeric_limits<double>().max();
-    this->saveBest(this->bestError, this->Kp, this->Kd, this->Ki );
+    this->saveBest(std::numeric_limits<double>().max(), this->Kp, this->Kd, this->Ki );
 
     // Set twiddle initial values
     this->twiddle_index = 0;
@@ -27,12 +27,11 @@ Search::Search(PID *pid, int iters_per_parameters)
     this->twiddle_values[1] = &(this->Kd);
     this->twiddle_values[2] = &(this->Ki);
 
-    static double twiddle_initial_factor =  1.0/15.0;
+    static double twiddle_initial_factor =  1.0/50.0;
 
     this->twiddle_deltas[0] = this->Kp*twiddle_initial_factor;
     this->twiddle_deltas[1] = this->Kd*twiddle_initial_factor;
     this->twiddle_deltas[2] = this->Ki*twiddle_initial_factor;
-
 }
 
 void Search::nextIter()
@@ -71,6 +70,16 @@ void Search::nextIter()
         this->changeParameters(new_best);
         this->currentLoop++;
         this->currentIteration = 0;
+
+        if( (this->currentLoop % validate_every_n_loops) == 0)
+        {
+            std::cout << " Performing validation of the best model." <<  std::endl;
+            this->Kp = this->best_Kp;
+            this->Kd = this->best_Kd;
+            this->Ki = this->best_Ki;
+            pid->Init(this->Kp, this->Kd, this->Ki);
+            this->saveBest(std::numeric_limits<double>().max(), this->Kp, this->Kd, this->Ki );
+        }
     }
 }
 
@@ -111,6 +120,11 @@ void Search::changeParameters(bool newbest)
             *twiddle_values[twiddle_index] -=  2*twiddle_deltas[twiddle_index];
         }
     }
+
+    double deltas_sum = 0;
+    for(int i=0;i<3;++i)
+        deltas_sum += twiddle_deltas[i];
+    std::cout << " Twiddle deltas sum:" << deltas_sum << std::endl;
     
     if(!twiddle_direction)
         twiddle_index++;
