@@ -28,8 +28,11 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
+  int raceLoopIterations = 5000; // TODO use that below
+  int searchIterations = 5;
+
   PID pid(0.2,.0001,3);
-  Search hyperParamsSearch(&pid, 2000, 1000);
+  Search hyperParamsSearch(&pid, 50, searchIterations);
   PIDData piddata(&pid, &hyperParamsSearch);
 
   h.onMessage([&piddata](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 

@@ -11,6 +11,8 @@ private:
   double p_error = 0;
   double i_error = 0;
   double d_error = 0;
+  double i2_error = 0;
+  int samples_count = 0;
 
   /*
   * Coefficients
@@ -46,6 +48,21 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  
+  double GetKp();
+  double GetKi();
+  double GetKd();
+
+  /*
+  * Gets average error through whole run (from Init)
+  */
+  double MeanAbsoluteError();
+
+  /*
+  * Gets average error through whole run (from Init)
+  */
+  double MeanSquaredError();
 };
 
 #endif /* PID_H */
