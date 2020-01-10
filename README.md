@@ -4,7 +4,7 @@ This project is a part of:
 
 ## Project description
 
-The purpose of this project is to build PID controller for car moving in simulator. The code controlls angle of steering in order to stay in the center of the lane. Only information it uses to calculate steeing is an real-time error telling how far off the center ot the line car is at every moment.
+The purpose of this project is to build PID controller for car moving in simulator. The code controlls angle of steering in order to stay in the center of the lane. Only information it uses to calculate steeing is an real-time error telling how far off the center of the line car is at every moment.
 
 ## Basic Build Instructions
 
@@ -34,7 +34,7 @@ At every step:
 **D** *= CTE - last_CTE*  
 **K** *= last_K + CTE*  
 
-The final euation if equal to: 
+The final equation is: 
 
 *steering_angle* = *Kp* * **P** + *Kd* * **D** + *Ki* * **I**   
 
@@ -44,9 +44,9 @@ where *Ki*, *Kd*, *Ki* are parameters that has to be optimized in order to minim
 
 **P component** - it decides how fast the car will make a turn. Big value without the right corresponding D compoment will cause high oscillation. Too low value will casue the car will not turn fast enough.
 
-**D complment** - For the chosen P component it counteracts oscillation. Too high havue will cause to much attention to staying neer the center and the steering will change agressively just to stay right in the center.
+**D complment** - For the chosen P component it counteracts oscillation. Too high value will cause to much attention to staying near the center and the steering will change agressively just to stay right in the center.
 
-**I component** - Simulator did not introduce any bias so initial tart with very small value in the end ended at 0. Bad value for the system will cause the cas goes off track.
+**I component** - Simulator did not introduce any bias so initially started with very small value and finished at 0. Bad value for the system will cause the car goes off track very fast.
 
 
 ## Optimization
@@ -56,10 +56,10 @@ The optimization started from setting parameters close to the ones from original
 
 *The simulation was showing some oscillation*
 
-As a first step Twiddle algorightm was implemented. The initial idea wat to go 500 iterations at each twiddle run and then change next parameter corresponding to the algorithm.
-Chosen error metric was set to Mean Squared Error od CTE.
+As a first step Twiddle algorightm was implemented. The initial idea was to go 500 iterations at each twiddle run and then change next parameter corresponding to the algorithm.
+Chosen error metric was set to Mean Squared Error of CTE.
 
-The problems appeared that during the search for some bar values of parameters car was going off the track ant the simulator needed to be restarted. Since the automation of this process was not trivial couple of manual runs were done using 'human supervision'.
+The problems appeared: during the search when some bad values were tested car was going off the track and the simulator needed to be restarted. Since the automation of this process was not trivial couple of manual runs were done using 'human supervision'.
 
 *The visual effects did not improve much*
 
@@ -68,18 +68,18 @@ Next step was to initially decrease deltas for twiddle algorithm to prevent choo
 After 16 laps parameters changed to :  
 **Kp 0.232878, Kd:3.74842, Ki:0.000100122**
 
-Next, validation of best result found was introduced with reset of twiddle algorithm. The previous soludion was very unstable and the result found depended too much on moment of start. To validate the best result after some arbitraty chosen times of run the twiddle best value was reset and re-calculation of error was done.
+Next, validation of best result found was introduced. The previous solution was very unstable and the result found depended too much on moment of start. To validate the best result after some arbitraty chosen times of run the twiddle best value was reset and re-calculation of the error was done.
 
-After 300 steps with 400 iterations the result changed to :
+After 300 cycles with 400 iterations each the result changed to :
 **Kp: 0.241336, Kd:3.94704, Ki:0.000115009**
 
-*Visually there was still oscilation visible*
+*Visually there was still some oscilation visible*
 
 Next step was to remove manually bias since the results were sugessting that there is no bias in the system.
 
 *The result was very similar to previous one, removing bias was considered as a good move*.
 
-Then gradient descent of the error was implemented and was running while car was driving. Each 1000 steps algoright was improving the parameters. After 10 laps the result values were equal to :  
+Then gradient descent of the error was implemented and was running while car was driving. After each 1000 steps algorightm was improving the parameters. After 10 laps the final result values were equal to :  
 
 **Kp: 0.185304, Kd:3.90704, Ki:0.0**
 
@@ -92,8 +92,8 @@ The result from simulation can be viewed here:
 
 ## Discussion
 
-The main issue of PID algorith is that it does not look ahead and the changes in lane vary much so it cannot easyli find the perfect solution that would not incorporate side jerks.
+The main issue of PID algorithm is that it does not look ahead and the changes in lane curvature vary much so it cannot easily find the perfect solution that would not incorporate side jerks.
 
 Solutions like Reinforcement Learning on visual frame could improve the results drastically. 
 
-Also having detected the line borders before the car could also be used to look more ahead of the car and calculate better results.
+Also having detected the line borders before the car could also be used to look more ahead of the car and calculate better results using some averaging.
