@@ -2,12 +2,13 @@
 #include <cmath>
 #include <iostream>
 
-PID::PID(double Kp, double Kd, double Ki) {
+PID::PID(double Kp, double Kd, double Ki, bool use_sgd) {
   this->Init(Kp, Kd, Ki);
   this->p_errors_count = 0;
   this->p_errors_sum = 0;
   this->d_errors_count = 0;
   this->d_errors_sum = 0;
+  this->use_sgd = use_sgd;
 }
 
 void PID::Init(double Kp, double Kd, double Ki)
@@ -34,7 +35,10 @@ void PID::UpdateError(double cte) {
   i2_error += cte*cte;
   samples_count++;
 
-  GradientDescent();
+  if(use_sgd)
+  {
+    GradientDescent();
+  }
 }
 
 double PID::MeanAbsoluteError()
@@ -99,5 +103,4 @@ void PID::GradientDescent(void){
     this->d_errors_count = 0;
     this->d_errors_sum = 0;
   }
-
 }

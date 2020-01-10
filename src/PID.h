@@ -27,13 +27,18 @@ private:
   double Ki;
   double Kd;
 
+  /*
+    SGD flag
+  */
+  bool use_sgd;
+
 
 
 public:
   /*
   * Constructor
   */
-  PID(double Kp, double Kd, double Ki);
+  PID(double Kp, double Kd, double Ki, bool use_sgd);
 
   /*
   * Destructor.
