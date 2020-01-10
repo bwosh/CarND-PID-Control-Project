@@ -1,32 +1,10 @@
 # CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+This project is a part of:  
+ [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
----
+## Project description
 
-## Dependencies
-
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
-
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+The purpose of this project is to build PID controller for car moving in simulator. The code controlls angle of steering in order to stay in the center of the lane. Only information it uses to calculate steeing is an real-time error telling how far off the center ot the line car is at every moment.
 
 ## Basic Build Instructions
 
@@ -35,64 +13,87 @@ Fellow students have put together a guide to Windows set-up for the project [her
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
+## Running the simulator
 
-## Editor Settings
+The project is using [Term 2 Simulator](https://github.com/udacity/self-driving-car-sim/releases) from Udacity. Run it along with the code binary and watch the result. It should look like:
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+![simulator](output/screen.png)
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+## Solution description
 
-## Code Style
+Solution implemented classic PID controller where three components are involved in calculating steering angle.
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+**P component** handles proportion of the steeing angle depending on the cross track error (CTE; off-center of the lane error).  
 
-## Project Instructions and Rubric
+**D complment** handles differential part of the equation. It counteracts tendency to overshoot the center line and oscilate left and right.
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+**I component** handles integral part of the equation. If there exist a bias in the system integral compoment will address the shift from the center.
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+At every step:  
+**P** *= CTE*  
+**D** *= CTE - last_CTE*  
+**K** *= last_K + CTE*  
 
-## Hints!
+The final euation if equal to: 
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+*steering_angle* = *Kp* * **P** + *Kd* * **D** + *Ki* * **I**   
 
-## Call for IDE Profiles Pull Requests
+where *Ki*, *Kd*, *Ki* are parameters that has to be optimized in order to minimize desired overall error of the system. The optimization process used is described below.
 
-Help your fellow students!
+## Parameters vs behaviour
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
+**P component** - it decides how fast the car will make a turn. Big value without the right corresponding D compoment will cause high oscillation. Too low value will casue the car will not turn fast enough.
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+**D complment** - For the chosen P component it counteracts oscillation. Too high havue will cause to much attention to staying neer the center and the steering will change agressively just to stay right in the center.
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+**I component** - Simulator did not introduce any bias so initial tart with very small value in the end ended at 0. Bad value for the system will cause the cas goes off track.
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
+## Optimization
+The optimization started from setting parameters close to the ones from original lecture:  
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+**Kp:0.2 Kd:3.0, Ki:0.0001**
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+*The simulation was showing some oscillation*
 
+As a first step Twiddle algorightm was implemented. The initial idea wat to go 500 iterations at each twiddle run and then change next parameter corresponding to the algorithm.
+Chosen error metric was set to Mean Squared Error od CTE.
+
+The problems appeared that during the search for some bar values of parameters car was going off the track ant the simulator needed to be restarted. Since the automation of this process was not trivial couple of manual runs were done using 'human supervision'.
+
+*The visual effects did not improve much*
+
+Next step was to initially decrease deltas for twiddle algorithm to prevent choosing very differnt values to keep the car stable; also the number of iterations was changed to about 6000 which was close to one lap.
+
+After 16 laps parameters changed to :  
+**Kp 0.232878, Kd:3.74842, Ki:0.000100122**
+
+Next, validation of best result found was introduced with reset of twiddle algorithm. The previous soludion was very unstable and the result found depended too much on moment of start. To validate the best result after some arbitraty chosen times of run the twiddle best value was reset and re-calculation of error was done.
+
+After 300 steps with 400 iterations the result changed to :
+**Kp: 0.241336, Kd:3.94704, Ki:0.000115009**
+
+*Visually there was still oscilation visible*
+
+Next step was to remove manually bias since the results were sugessting that there is no bias in the system.
+
+*The result was very similar to previous one, removing bias was considered as a good move*.
+
+Then gradient descent of the error was implemented and was running while car was driving. Each 1000 steps algoright was improving the parameters. After 10 laps the result values were equal to :  
+
+**Kp: 0.185304, Kd:3.90704, Ki:0.0**
+
+*and visually it improved the oscillation issues much.*
+
+## Output video
+The result from simulation can be viewed here:
+
+[![simulator](output/screen2.png)](output/256crf32hvc1scaled.mp4)
+
+## Discussion
+
+The main issue of PID algorith is that it does not look ahead and the changes in lane vary much so it cannot easyli find the perfect solution that would not incorporate side jerks.
+
+Solutions like Reinforcement Learning on visual frame could improve the results drastically. 
+
+Also having detected the line borders before the car could also be used to look more ahead of the car and calculate better results.
