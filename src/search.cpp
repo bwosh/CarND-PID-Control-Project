@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 
+#define MAX_VALUE 1.7976931348623158e+308
+
 Search::Search(PID *pid, int iters_per_parameters, int validate_every_n_loops)
 {
     this->pid = pid;
@@ -16,7 +18,7 @@ Search::Search(PID *pid, int iters_per_parameters, int validate_every_n_loops)
     this->Kd = pid->GetKd();
     this->Ki = pid->GetKi();
 
-    this->saveBest(std::numeric_limits<double>().max(), this->Kp, this->Kd, this->Ki );
+    this->saveBest(MAX_VALUE, this->Kp, this->Kd, this->Ki );
 
     // Set twiddle initial values
     this->twiddle_index = 0;
@@ -78,7 +80,7 @@ void Search::nextIter()
             this->Kd = this->best_Kd;
             this->Ki = this->best_Ki;
             pid->Init(this->Kp, this->Kd, this->Ki);
-            this->saveBest(std::numeric_limits<double>().max(), this->Kp, this->Kd, this->Ki );
+            this->saveBest(MAX_VALUE, this->Kp, this->Kd, this->Ki );
         }
     }
 }
